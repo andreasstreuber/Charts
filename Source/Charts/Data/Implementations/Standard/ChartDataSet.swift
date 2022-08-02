@@ -217,8 +217,8 @@ open class ChartDataSet: ChartBaseDataSet
         rounding: ChartDataSetRounding) -> Int
     {
         var closest = partitioningIndex { $0.x >= xValue }
-        guard closest < endIndex else { return rounding == .closest ? (endIndex-1) : -1 }
-
+        guard closest < endIndex else { return [.down, .closest].contains(rounding) ? (endIndex-1) : -1 }
+        
         var closestXValue = self[closest].x
 
         switch rounding {
@@ -435,6 +435,11 @@ extension ChartDataSet: RandomAccessCollection {
 
 // MARK: RangeReplaceableCollection
 extension ChartDataSet: RangeReplaceableCollection {
+    public func replaceSubrange<C>(_ subrange: Swift.Range<Index>, with newElements: C) where C : Collection, Element == C.Element {
+         entries.replaceSubrange(subrange, with: newElements)
+         notifyDataSetChanged()
+     }
+
     public func append(_ newElement: Element) {
         calcMinMax(entry: newElement)
         entries.append(newElement)
